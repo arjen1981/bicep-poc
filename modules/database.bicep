@@ -33,6 +33,13 @@ resource sqlServer 'Microsoft.Sql/servers@2021-11-01' = {
     administratorLogin: sqlServerAdministratorLogin
     administratorLoginPassword: sqlServerAdministratorPassword
   }
+  resource firewallRule 'firewallRules@2021-11-01' = {
+    name: 'AllowTFEIP'
+    properties: {
+      startIpAddress: '91.206.137.194'
+      endIpAddress: '91.206.137.194'
+    }
+  }
 }
 
 resource sqlDatabase 'Microsoft.Sql/servers/databases@2021-11-01' = {
