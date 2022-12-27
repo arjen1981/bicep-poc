@@ -10,6 +10,23 @@
       },
       "projectName": {
         "value": "bicep"
+      },
+      "sqlServerAdministratorLogin": {
+        "reference": {
+          "keyVault": {
+            "id": "/subscriptions/c49c1cbc-23f1-4724-83f9-708f7eeb9e36/resourceGroups/arjen-bicep-tst-rg/providers/Microsoft.KeyVault/vaults/arjen-bicep-tst-vault"
+          },
+          "secretName": "sqlServerAdministratorLogin"
+        }
+      },
+      "sqlServerAdministratorPassword": {
+        "reference": {
+          "keyVault": {
+            "id": "/subscriptions/c49c1cbc-23f1-4724-83f9-708f7eeb9e36/resourceGroups/arjen-bicep-tst-rg/providers/Microsoft.KeyVault/vaults/arjen-bicep-tst-vault"
+          },
+          "secretName": "sqlServerAdministratorPassword"
+        }
       }
     }
   }
+  

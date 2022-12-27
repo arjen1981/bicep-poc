@@ -24,6 +24,14 @@ param resourceTags object = {
   Team: 'awsome team'
 }
 
+@secure()
+@description('The administrator login username for the SQL server.')
+param sqlServerAdministratorLogin string
+
+@secure()
+@description('The administrator login password for the SQL server.')
+param sqlServerAdministratorPassword string
+
 module storage 'modules/storage.bicep' = {
   name: 'storage'
   params: {
@@ -32,6 +40,19 @@ module storage 'modules/storage.bicep' = {
     customerName: customerName
     projectName: projectName
     resourceTags: resourceTags
+  }
+}
+
+module database 'modules/database.bicep' = {
+  name: 'database'
+  params: {
+    location: location
+    environmentType: environmentType
+    customerName: customerName
+    projectName: projectName
+    resourceTags: resourceTags
+    sqlServerAdministratorLogin: sqlServerAdministratorLogin
+    sqlServerAdministratorPassword: sqlServerAdministratorPassword
   }
 }
 
