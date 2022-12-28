@@ -7,26 +7,41 @@ param location string
 ])
 param environmentType string
 
-param customerName string
-param projectName string
+param resourceNamePrefix string
 
 param resourceTags object
 
-var resourceNamePrefix = '${customerName}-${projectName}-${environmentType}'
+param subnetId string
+
 var appServicePlanName = '${resourceNamePrefix}-plan'
-var appServicePlanSkuName = (environmentType == 'prd') ? 'P2V3' : 'F1'
-/* Example of an object type param.
-param appServicePlanSku object = {
-  name: 'F1'
-  tier: 'Free'
-  capacity: 1
-} */
+var appServicePlanSkuName = (environmentType == 'prd') ? 'B1' : 'F1'
 var appServiceAppName  = '${resourceNamePrefix}-web'
 
-/* Example of how to use the minValue and maxValue to validate the value of an int.
-@minValue(1)
-@maxValue(10)
-param appServicePlanInstanceCount int */
+var environmentConfigurationMap = {
+  tst: {
+    serverFarmId: appServicePlan.id
+    httpsOnly: true
+    siteConfig: {
+      http20Enabled: true
+    }
+  }
+  acc: {
+    serverFarmId: appServicePlan.id
+    httpsOnly: true
+    siteConfig: {
+      http20Enabled: true
+    }
+  }
+  prd: {
+    serverFarmId: appServicePlan.id
+    virtualNetworkSubnetId: subnetId
+    httpsOnly: true
+    siteConfig: {
+      vnetRouteAllEnabled: true
+      http20Enabled: true
+    }
+  }
+}
 
 resource appServicePlan 'Microsoft.Web/serverFarms@2022-03-01' = {
   name: appServicePlanName
@@ -41,10 +56,7 @@ resource appServiceApp 'Microsoft.Web/sites@2022-03-01' = {
   name: appServiceAppName
   location: location
   tags: resourceTags
-  properties: {
-    serverFarmId: appServicePlan.id
-    httpsOnly: true
-  }
+  properties: environmentConfigurationMap[environmentType]
 }
 
 output appServiceAppHostName string = appServiceApp.properties.defaultHostName

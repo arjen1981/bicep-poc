@@ -9,41 +9,8 @@ param location string = resourceGroup().location
 ])
 param environmentType string
 
-/* Alternativly you can use a map to define the environment configuration.
-var environmentConfigurationMap = {
-  Production: {
-    appServicePlan: {
-      sku: {
-        name: 'P2V3'
-        capacity: 3
-      }
-    }
-    storageAccount: {
-      sku: {
-        name: 'ZRS'
-      }
-    }
-  }
-  Test: {
-    appServicePlan: {
-      sku: {
-        name: 'S2'
-        capacity: 1
-      }
-    }
-    storageAccount: {
-      sku: {
-        name: 'LRS'
-      }
-    }
-  }
-}
-*/
-
 @description('The customer name.')
-/* Example of how to use the minLength and maxLength to validate the length of a string.
-@minLength(5)
-@maxLength(30) */
+
 param customerName string
 
 @description('The project name.')
@@ -64,13 +31,14 @@ param sqlServerAdministratorLogin string
 @description('The administrator login password for the SQL server.')
 param sqlServerAdministratorPassword string
 
+var resourceNamePrefix = '${customerName}-${projectName}-${environmentType}'
+
 module storage 'modules/storage.bicep' = {
   name: 'storage'
   params: {
     location: location
     environmentType: environmentType
-    customerName: customerName
-    projectName: projectName
+    resourceNamePrefix: '${customerName}${projectName}${environmentType}'
     resourceTags: resourceTags
   }
 }
@@ -80,44 +48,38 @@ module database 'modules/database.bicep' = {
   params: {
     location: location
     environmentType: environmentType
-    customerName: customerName
-    projectName: projectName
+    resourceNamePrefix: resourceNamePrefix
     resourceTags: resourceTags
     sqlServerAdministratorLogin: sqlServerAdministratorLogin
     sqlServerAdministratorPassword: sqlServerAdministratorPassword
   }
 }
 
-/* Example of using loops.
-@description('The Azure regions into which the resources should be deployed.')
-param locations array = [
-  'westeurope'
-  'eastus2'
-]
-
-@batchSize(1) // 1 if you dont want to run this loop parallel, which is more expensive
-module databases 'modules/database.bicep' = [for location in locations: {
-  name: 'database-${location}'
+module network 'modules/network.bicep' = if (environmentType == 'prd') {
+  name: 'network'
   params: {
     location: location
     environmentType: environmentType
-    customerName: customerName
-    projectName: projectName
+    resourceNamePrefix: resourceNamePrefix
+    sqlServerId: database.outputs.sqlServerId
+    sqlServerName: database.outputs.sqlServerName
     resourceTags: resourceTags
-    sqlServerAdministratorLogin: sqlServerAdministratorLogin
-    sqlServerAdministratorPassword: sqlServerAdministratorPassword
   }
-}] */
+  dependsOn: [
+    database
+  ]
+}
 
 module appService 'modules/appService.bicep' = {
   name: 'appService'
   params: {
     location: location
     environmentType: environmentType
-    customerName: customerName
-    projectName: projectName
+    resourceNamePrefix: resourceNamePrefix
     resourceTags: resourceTags
+    subnetId: (environmentType == 'prd') ? network.outputs.subnetWebAppId : ''
   }
+  dependsOn: (environmentType == 'prd') ? [network] : []
 }
 
 output appServiceAppHostName string = appService.outputs.appServiceAppHostName
