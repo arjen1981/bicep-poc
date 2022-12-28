@@ -15,14 +15,16 @@ param resourceTags object
 var resourceNamePrefix = '${customerName}-${projectName}-${environmentType}'
 var appServicePlanName = '${resourceNamePrefix}-plan'
 var appServicePlanSkuName = (environmentType == 'prd') ? 'P2V3' : 'F1'
-/* param appServicePlanSku object = {
+/* Example of an object type param.
+param appServicePlanSku object = {
   name: 'F1'
   tier: 'Free'
   capacity: 1
 } */
 var appServiceAppName  = '${resourceNamePrefix}-web'
 
-/* @minValue(1)
+/* Example of how to use the minValue and maxValue to validate the value of an int.
+@minValue(1)
 @maxValue(10)
 param appServicePlanInstanceCount int */
 

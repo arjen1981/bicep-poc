@@ -9,8 +9,40 @@ param location string = resourceGroup().location
 ])
 param environmentType string
 
+/* Alternativly you can use a map to define the environment configuration.
+var environmentConfigurationMap = {
+  Production: {
+    appServicePlan: {
+      sku: {
+        name: 'P2V3'
+        capacity: 3
+      }
+    }
+    storageAccount: {
+      sku: {
+        name: 'ZRS'
+      }
+    }
+  }
+  Test: {
+    appServicePlan: {
+      sku: {
+        name: 'S2'
+        capacity: 1
+      }
+    }
+    storageAccount: {
+      sku: {
+        name: 'LRS'
+      }
+    }
+  }
+}
+*/
+
 @description('The customer name.')
-/* @minLength(5)
+/* Example of how to use the minLength and maxLength to validate the length of a string.
+@minLength(5)
 @maxLength(30) */
 param customerName string
 
@@ -55,6 +87,27 @@ module database 'modules/database.bicep' = {
     sqlServerAdministratorPassword: sqlServerAdministratorPassword
   }
 }
+
+/* Example of using loops.
+@description('The Azure regions into which the resources should be deployed.')
+param locations array = [
+  'westeurope'
+  'eastus2'
+]
+
+@batchSize(1) // 1 if you dont want to run this loop parallel, which is more expensive
+module databases 'modules/database.bicep' = [for location in locations: {
+  name: 'database-${location}'
+  params: {
+    location: location
+    environmentType: environmentType
+    customerName: customerName
+    projectName: projectName
+    resourceTags: resourceTags
+    sqlServerAdministratorLogin: sqlServerAdministratorLogin
+    sqlServerAdministratorPassword: sqlServerAdministratorPassword
+  }
+}] */
 
 module appService 'modules/appService.bicep' = {
   name: 'appService'

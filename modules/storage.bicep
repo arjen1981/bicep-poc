@@ -13,8 +13,9 @@ param projectName string
 param resourceTags object
 
 var storageAccountName = '${customerName}${projectName}${environmentType}storage'
-// var storageAccountName string = '{customerName}${projectName}${environmentType}storage${uniqueString(resourceGroup().id)}'
-// All functions: https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/bicep-functions
+/* Example of a function that can be used to generate a unique string based on the resource group id.
+var storageAccountName string = '{customerName}${projectName}${environmentType}storage${uniqueString(resourceGroup().id)}'
+All functions: https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/bicep-functions */
 var storageAccountSkuName = (environmentType == 'prd') ? 'Standard_GRS' : 'Standard_LRS'
 
 resource storageAccount 'Microsoft.Storage/storageAccounts@2022-09-01' = {
